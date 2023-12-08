@@ -101,10 +101,3 @@ def total_segmentator_output_to_objs(ts_out_file_path, output_folder, segments_o
         # print(f"Saved segment {segment_name} as {segment_name}.obj")
     
     return output_metadata
-
-if __name__ == "__main__":
-    file_path = '1-tsoc.nii.gz'
-    output_dir = "outputs/1-tsoc"
-    os.makedirs(output_dir, exist_ok=True)
-
-    total_segmentator_output_to_objs(file_path, output_dir, [])
