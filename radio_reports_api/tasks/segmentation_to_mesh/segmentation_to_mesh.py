@@ -5,14 +5,14 @@ import json
 from skimage import measure
 
 
-segment_value_to_name = {
-    1: "spleen",
-    # 2: "kidney_right",
-    # 3: "kidney_left",
-    # 4: "gallbladder",
-    # 5: "liver",
-}
+segments_json_path = os.path.join(os.path.dirname(__file__), "segments.json")
+
+segment_value_to_name = {}
 segment_names = []
+with open(segments_json_path, 'r') as file:
+    data = json.load(file)
+    segment_value_to_name = {int(key): value for key, value in data.items()}
+    segment_names = [value for key, value in data.items()]
 
 def get_polygonal_mesh_from_voxel_data(volume_data, voxel_spacing):
     verts, faces, normals, values = measure.marching_cubes(
