@@ -1,11 +1,14 @@
 from os import path, remove, makedirs, rmdir
 
 from radio_reports.settings import CACHE_ROOT
-from radio_reports_api.utils import unique_str
+from radio_reports_api.utils import (
+    get_extension,
+    unique_str,
+)
 
 
 def save_file_to_cache(file, filename=None):
-    _, file_extension = path.splitext(file.name)
+    file_extension = get_extension(file.name)
     if filename is not None:
         filename = f"{unique_str()}{file_extension}"
     filepath = path.join(CACHE_ROOT, filename)

@@ -15,6 +15,9 @@ from radio_reports_api.cache import (
 from radio_reports_api.cloud_storage import (
     upload_to_cloud_storage_from_cache,
 )
+from radio_reports_api.utils import (
+    select_random_segment_names,
+)
 from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
 from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
 from radio_reports_api.utils import unique_str
@@ -39,15 +42,15 @@ class AddReportAPIView(APIView):
         meshes_output_dir_path = create_folder_in_cache(report_media_id)
 
         simplified_reports = {
-            'english':  "the simplified report data", # get these from LLM API
+            'english':  "the simplified report data", # TODO (Dr. Amit): get these from the LLM API
         }
-        segments_of_interest = [] # get these from LLM API
+        segments_of_interest = select_random_segment_names(segment_names) # TODO (Dr. Amit): get these from the LLM API
 
         # Run total segmentor
-        run_total_segmentator_on_nii_image(nii_file_path, ts_out_file_path)
+        # run_total_segmentator_on_nii_image(nii_file_path, ts_out_file_path)
         
         # Run convertor to mesh
-        meshes_metadata = total_segmentator_output_to_objs(ts_out_file_path, meshes_output_dir_path, segments_of_interest)
+        # meshes_metadata = total_segmentator_output_to_objs(ts_out_file_path, meshes_output_dir_path, segments_of_interest)
         
         # Move meshes to cloud storage
         upload_to_cloud_storage_from_cache(report_media_id, join("segment-meshes", report_media_id))
@@ -58,15 +61,14 @@ class AddReportAPIView(APIView):
         # Delete segmentation from cache
         delete_from_cache(basename(ts_out_file_path))
 
-        new_report = Report.objects.create(
-            report_media_id=report_media_id,
-            meshes_metadata=json.dumps(meshes_metadata),
-            original_report=report_data,
-            simplified_reports=json.dumps(simplified_reports),
-            processing_status="Processing completed."
-        )
-
-
+        # new_report = Report.objects.create(
+        #     report_media_id=report_media_id,
+        #     meshes_metadata=json.dumps(meshes_metadata),
+        #     original_report=report_data,
+        #     simplified_reports=json.dumps(simplified_reports),
+        #     processing_status="Processing completed."
+        # )
+        
         # Generate QR code and return it
 
         return Response({
