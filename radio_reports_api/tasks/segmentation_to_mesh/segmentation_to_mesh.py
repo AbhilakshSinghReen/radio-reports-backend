@@ -7,10 +7,10 @@ from skimage import measure
 
 segment_value_to_name = {
     1: "spleen",
-    2: "kidney_right",
-    3: "kidney_left",
-    4: "gallbladder",
-    5: "liver",
+    # 2: "kidney_right",
+    # 3: "kidney_left",
+    # 4: "gallbladder",
+    # 5: "liver",
 }
 segment_names = []
 
@@ -84,7 +84,7 @@ def total_segmentator_output_to_objs(ts_out_file_path, output_folder, segments_o
 
         segment_name = segment_value_to_name.get(int(segment_value), None)
         if segment_name is None:
-            print(f"No name found for segment value {segment_value}. Skipping this segment...")
+            # print(f"No name found for segment value {segment_value}. Skipping this segment...")
             continue
 
         segment_obj_output_path = os.path.join(output_folder, f"{segment_name}.obj")
@@ -98,7 +98,7 @@ def total_segmentator_output_to_objs(ts_out_file_path, output_folder, segments_o
         # with open(output_metadata_json_path, 'w') as file:
         #     json.dump(output_metadata, file, indent=2)
 
-        print(f"Saved segment {segment_name} as {segment_name}.obj")
+        # print(f"Saved segment {segment_name} as {segment_name}.obj")
     
     return output_metadata
 

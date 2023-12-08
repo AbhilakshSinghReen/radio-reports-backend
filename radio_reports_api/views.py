@@ -47,13 +47,13 @@ class AddReportAPIView(APIView):
         segments_of_interest = select_random_segment_names(segment_names) # TODO (Dr. Amit): get these from the LLM API
 
         # Run total segmentor
-        # run_total_segmentator_on_nii_image(nii_file_path, ts_out_file_path)
+        run_total_segmentator_on_nii_image(nii_file_path, ts_out_file_path)
         
         # Run convertor to mesh
-        # meshes_metadata = total_segmentator_output_to_objs(ts_out_file_path, meshes_output_dir_path, segments_of_interest)
+        meshes_metadata = total_segmentator_output_to_objs(ts_out_file_path, meshes_output_dir_path, segments_of_interest)
         
         # Move meshes to cloud storage
-        upload_to_cloud_storage_from_cache(report_media_id, join("segment-meshes", report_media_id))
+        upload_to_cloud_storage_from_cache(report_media_id, "segment-meshes")
 
         # Delete nifti from cache
         delete_from_cache(nii_file_name)
@@ -61,19 +61,20 @@ class AddReportAPIView(APIView):
         # Delete segmentation from cache
         delete_from_cache(basename(ts_out_file_path))
 
-        # new_report = Report.objects.create(
-        #     report_media_id=report_media_id,
-        #     meshes_metadata=json.dumps(meshes_metadata),
-        #     original_report=report_data,
-        #     simplified_reports=json.dumps(simplified_reports),
-        #     processing_status="Processing completed."
-        # )
-        
+        new_report = Report.objects.create(
+            report_media_id=report_media_id,
+            meshes_metadata=json.dumps(meshes_metadata),
+            original_report=report_data,
+            simplified_reports=json.dumps(simplified_reports),
+            processing_status="Processing completed."
+        )
+
         # Generate QR code and return it
 
         return Response({
             'success': True,
             'result': {
+                'reportId': new_report.id,
                 'qrCode': "foo",
                 'reportLink': "bar",
             },
