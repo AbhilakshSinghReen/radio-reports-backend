@@ -1,0 +1,1 @@
+from .segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
