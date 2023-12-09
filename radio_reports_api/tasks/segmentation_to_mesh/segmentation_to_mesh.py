@@ -66,12 +66,18 @@ def save_segment_as_object(output_file_path, _volume_data, voxel_spacing, segmen
 def total_segmentator_output_to_objs(ts_out_file_path, output_folder, segments_of_interest):
     segments_of_interest = set(segments_of_interest)
 
-    nifti_file = nib.load(ts_out_file_path)
-    voxel_spacing = nifti_file.header.get_zooms()
-    volume_data = nifti_file.get_fdata()
+    nifti_image = nib.load(ts_out_file_path)
+    voxel_spacing = nifti_image.header.get_zooms()
+    volume_affine = nifti_image.affine
+    volume_data = nifti_image.get_fdata()
 
     segment_values = np.unique(volume_data)
     output_metadata = {
+        'input_volume': {
+            'shape': volume_data.shape,
+            'voxel_spacing': voxel_spacing,
+            'affine': volume_affine,
+        },
         'meshes': [],
     }
     # output_metadata_json_path = os.path.join(output_folder, f"metadata.json")
