@@ -4,7 +4,7 @@ import json
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework import status
 
 from radio_reports_api.cache import (
@@ -18,6 +18,7 @@ from radio_reports_api.cloud_storage import (
 from radio_reports_api.utils import (
     select_random_segment_names,
 )
+from radio_reports.settings import CACHE_ROOT
 from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
 from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
 from radio_reports_api.utils import unique_str
@@ -29,7 +30,7 @@ class AddReportAPIView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
-        admin_secret_header = request.headers.get('X-AD-ADMIN-SECRET')
+        admin_secret_header = request.headers.get('X-ABNORMAL_DOCS-ADMIN-SECRET')
         # validate admin secret
 
         nifti_image_file = request.FILES.get('niftiImage')
@@ -38,7 +39,7 @@ class AddReportAPIView(APIView):
 
         report_media_id = unique_str()
         nii_file_name, nii_file_path = save_file_to_cache(nifti_image_file, report_media_id)
-        ts_out_file_path = f"{report_media_id}-segmented.nii.gz"
+        ts_out_file_path = join(CACHE_ROOT, f"{report_media_id}-segmented.nii.gz")
         meshes_output_dir_path = create_folder_in_cache(report_media_id)
 
         simplified_reports = {
@@ -82,7 +83,29 @@ class AddReportAPIView(APIView):
 
 class GetReportAPIView(APIView):
     permission_classes = [AllowAny]
-    
+    parser_classes = [JSONParser]
 
-    def get(self, request):
-        pass
+    def post(self, request):
+        report_id = request.FILES.get('reportId')
+        # report_passcode = request.data.get('reportPasscode')
+        # validate above 1
+
+        report = Report.objects.get(id=report_id)
+
+        try:
+            report = Report.objects.get(id=report_id)
+        except:
+            return Response({
+                'success': False,
+                'error': {
+                    'code': -1,
+                    'message': "Invalid reportId"
+                },
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'success': True,
+            'result': {
+                'report': report,
+            },
+        }, status=status.HTTP_200_OK)
