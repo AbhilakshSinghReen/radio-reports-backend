@@ -18,6 +18,9 @@ from radio_reports_api.cloud_storage import (
 from radio_reports_api.utils import (
     select_random_segment_names,
 )
+from radio_reports_api.serializers import (
+    ReportSerializer,
+)
 from radio_reports.settings import CACHE_ROOT
 from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
 from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
@@ -86,14 +89,13 @@ class GetReportAPIView(APIView):
     parser_classes = [JSONParser]
 
     def post(self, request):
-        report_id = request.FILES.get('reportId')
+        report_id = request.data.get('reportId')
         # report_passcode = request.data.get('reportPasscode')
         # validate above 1
 
-        report = Report.objects.get(id=report_id)
-
         try:
             report = Report.objects.get(id=report_id)
+            report_serializer = ReportSerializer(report)
         except:
             return Response({
                 'success': False,
@@ -106,6 +108,6 @@ class GetReportAPIView(APIView):
         return Response({
             'success': True,
             'result': {
-                'report': report,
+                'report': report_serializer.data,
             },
         }, status=status.HTTP_200_OK)
