@@ -21,7 +21,7 @@ from radio_reports_api.utils import (
 from radio_reports_api.serializers import (
     ReportSerializer,
 )
-from radio_reports.settings import CACHE_ROOT
+from radio_reports.settings import CACHE_ROOT, ADMIN_SECRET
 # from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
 # from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
 from radio_reports_api.utils import unique_str
@@ -33,9 +33,12 @@ class AddReportAPIView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
-        admin_secret_header = request.headers.get('X-ABNORMAL_DOCS-ADMIN-SECRET')
-        # validate admin secret
-
+        print(request.headers)
+        admin_secret_header = request.headers.get('X-AD-ADMIN-SECRET')
+        print(admin_secret_header)
+        if not admin_secret_header == ADMIN_SECRET:
+            return Response({}, status=status.HTTP_401_UNAUTHORIZED)
+        
         nifti_image_file = request.FILES.get('niftiImage')
         report_data = request.data.get('reportData')
         # validate above 2

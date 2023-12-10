@@ -6,7 +6,6 @@ from radio_reports_api.utils import (
     unique_str,
 )
 
-
 def save_file_to_cache(file, filename=None):
     file_extension = get_extension(file.name)
     if filename is not None:
