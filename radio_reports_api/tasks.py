@@ -15,10 +15,9 @@ from radio_reports_api.task_scripts.segmentation_to_mesh import total_segmentato
 from radio_reports_api.utils import unique_str
 from radio_reports_api.models import Report
 
-run_total_segmentator_on_nii_image = "oko"
-total_segmentator_output_to_gltf = "oko"
-get_simplified_report = ",,,"
-get_segments_of_interest = "wdq"
+
+# get_simplified_report = ",,,"
+# get_segments_of_interest = "wdq"
 
 default_report_simplification_languages = ["english", "hindi"]
 
@@ -44,28 +43,28 @@ def generate_report_text_and_model(
 
     simplified_reports = {}
 
-    for language in default_report_simplification_languages:
-        try:
-            simplified_reports[language] = get_simplified_report(report_data, language)
-        except:
-            task_status = f"Failed at report simplification for language: {language}."
-            report_object.processing_status = task_status
-            report_object.save()
-            print(task_status)
-            return task_status
+    # for language in default_report_simplification_languages:
+    #     try:
+    #         simplified_reports[language] = get_simplified_report(report_data, language)
+    #     except:
+    #         task_status = f"Failed at report simplification for language: {language}."
+    #         report_object.processing_status = task_status
+    #         report_object.save()
+    #         print(task_status)
+    #         return task_status
         
     report_object.meshes_metadata = json.dumps(simplified_reports)
     report_object.processing_status = "Getting segments of interest..."
     report_object.save()
 
-    try:
-        segments_of_interest = get_segments_of_interest(report_data)
-    except:
-        task_status = f"Failed to get segments of interest."
-        report_object.processing_status = task_status
-        report_object.save()
-        print(task_status)
-        return task_status
+    # try:
+    #     segments_of_interest = get_segments_of_interest(report_data)
+    # except:
+    #     task_status = f"Failed to get segments of interest."
+    #     report_object.processing_status = task_status
+    #     report_object.save()
+    #     print(task_status)
+    #     return task_status
     
     report_object.processing_status = "Running Total Segmentator on nii image..."
     report_object.save()
@@ -82,14 +81,18 @@ def generate_report_text_and_model(
     report_object.processing_status = "Generating glTF from segmentation..."
     report_object.save()
 
-    try:
-        meshes_metadata = total_segmentator_output_to_gltf(ts_out_file_path, meshes_output_dir_path, segments_of_interest)
-    except:
-        task_status = f"Failed to generate glTF from segmentation."
-        report_object.processing_status = task_status
-        report_object.save()
-        print(task_status)
-        return task_status
+    # try:
+    meshes_metadata = total_segmentator_output_to_gltf(ts_out_file_path, meshes_output_dir_path)
+    # print(meshes_metadata)
+    # meshes_metadata['segmentsOfInterest'] = segments_of_interest
+    # except:
+    #     task_status = f"Failed to generate glTF from segmentation."
+    #     report_object.processing_status = task_status
+    #     report_object.save()
+    #     print(task_status)
+    #     return task_status
+
+    
     
     report_object.processing_status = "Uploading glTF to Cloud Storage..."
     report_object.save()

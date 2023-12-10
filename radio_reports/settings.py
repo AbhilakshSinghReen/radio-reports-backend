@@ -27,6 +27,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY')
 ADMIN_SECRET = config('ADMIN_SECRET')
 OPEN_AI_API_KEY = config('OPEN_AI_API_KEY')
+SLICER_EXE_PATH = config('SLICER_EXE_PATH')
+print(SLICER_EXE_PATH)
 
 ALLOWED_HOSTS=["*"] if DEBUG else [
     "localhost:3000",

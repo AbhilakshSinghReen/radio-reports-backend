@@ -34,9 +34,7 @@ class AddReportAPIView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
-        print(request.headers)
         admin_secret_header = request.headers.get('X-AD-ADMIN-SECRET')
-        print(admin_secret_header)
         if not admin_secret_header == ADMIN_SECRET:
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
         
@@ -65,6 +63,7 @@ class AddReportAPIView(APIView):
                 'reportLink': "bar",
             },
         }, status=status.HTTP_201_CREATED)
+
 
 class GetReportAPIView(APIView):
     permission_classes = [AllowAny]

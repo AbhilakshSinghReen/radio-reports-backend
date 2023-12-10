@@ -4,4 +4,6 @@ cache/*
 media/segment-meshes/*
 !media/segment-meshes/.gitkeep
 *.sqlite3
+**/*.gltf
+**/*.nii.gz
 .env
