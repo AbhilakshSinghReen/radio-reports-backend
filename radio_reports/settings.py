@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from os import path
 from pathlib import Path
 
+from decouple import config
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,11 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-17s@!i7=y=u#*e_=&**r&sz72^_5prsje5zb&#xuua5!1&5aw$"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast=bool)
+SECRET_KEY = config('SECRET_KEY')
+ADMIN_SECRET = config('ADMIN_SECRET')
+OPEN_AI_API_KEY = config('OPEN_AI_API_KEY')
 
 ALLOWED_HOSTS=["*"] if DEBUG else [
     "localhost:3000",
