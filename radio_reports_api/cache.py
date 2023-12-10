@@ -42,3 +42,10 @@ def create_folder_in_cache(folder_name):
     
     makedirs(folder_path)
     return folder_path
+
+def clean_cache_for_report_media_id(report_media_id):
+    nii_file_name = f"{report_media_id}.nii.gz"
+    ts_out_file_name = f"{report_media_id}-segmented.nii.gz"
+
+    delete_from_cache(nii_file_name)
+    delete_from_cache(ts_out_file_name)

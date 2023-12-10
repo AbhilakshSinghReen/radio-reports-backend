@@ -22,8 +22,8 @@ from radio_reports_api.serializers import (
     ReportSerializer,
 )
 from radio_reports.settings import CACHE_ROOT
-from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
-from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
+# from radio_reports_api.tasks.nifti_to_segmentation import run_total_segmentator_on_nii_image
+# from radio_reports_api.tasks.segmentation_to_mesh import total_segmentator_output_to_objs, segment_names
 from radio_reports_api.utils import unique_str
 from radio_reports_api.models import Report
 
@@ -42,6 +42,17 @@ class AddReportAPIView(APIView):
 
         report_media_id = unique_str()
         nii_file_name, nii_file_path = save_file_to_cache(nifti_image_file, report_media_id)
+
+        new_report = Report.objects.create(
+            report_media_id=report_media_id,
+            meshes_metadata=json.dumps({}),
+            original_report=report_data,
+            simplified_reports=json.dumps({}),
+            processing_status="Initializing..."
+        )
+
+        
+        
         ts_out_file_path = join(CACHE_ROOT, f"{report_media_id}-segmented.nii.gz")
         meshes_output_dir_path = create_folder_in_cache(report_media_id)
 
