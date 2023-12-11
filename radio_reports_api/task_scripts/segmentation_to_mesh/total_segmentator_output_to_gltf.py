@@ -14,9 +14,21 @@ convertor_script_out_path = os.path.join(os.path.dirname(__file__), "model.gltf"
 
 current_os = platform.system()
 if current_os == "Windows":
-    run_convertor_script_cmd = f""" "{SLICER_EXE_PATH}" --python-script "{convertor_script_path}" --no-splash --no-main-window """
+    run_convertor_script_cmd_args = [
+        SLICER_EXE_PATH,
+        "--python-script",
+        convertor_script_path,
+        "--no-splash",
+        "--no-main-window",
+    ]
 else:
-    run_convertor_script_cmd = f""" "{SLICER_EXE_PATH}" --no-splash --no-main-window --python-script "{convertor_script_path}" """
+    run_convertor_script_cmd_args = [
+        SLICER_EXE_PATH,
+        "--no-splash",
+        "--no-main-window",
+        "--python-script",
+        convertor_script_path,
+    ]
 
 segments_json_path = os.path.join(os.path.dirname(__file__), "segments.json")
 
@@ -32,6 +44,36 @@ def get_average_index_of_value(volume_data, value):
     val_average_index = np.mean(val_indices, axis=1)
     return val_average_index.tolist()
 
+def get_average_indices_of_all_values(volume_data):
+    value_indices_sum = {}
+    for i in range(volume_data.shape[0]):
+        for j in range(volume_data.shape[1]):
+            for k in range(volume_data.shape[2]):
+                value = volume_data[i, j, k]
+
+                if not value in value_indices_sum:
+                    value_indices_sum[value] = {
+                        'sumI': 0,
+                        'sumJ': 0,
+                        'sumK': 0,
+                        'count':0,
+                    }
+                
+                value_indices_sum[value]['sumI'] += i
+                value_indices_sum[value]['sumJ'] += j
+                value_indices_sum[value]['sumK'] += k
+                value_indices_sum[value]['count'] += 1
+
+    value_average_indices = {}
+    for value in value_indices_sum:
+        value_average_indices[value] = [
+            value_indices_sum[value]['sumI'] / value_indices_sum[value]['count'],
+            value_indices_sum[value]['sumJ'] / value_indices_sum[value]['count'],
+            value_indices_sum[value]['sumK'] / value_indices_sum[value]['count'],
+        ]
+    
+    return value_average_indices
+
 def get_output_metadata(ts_out_file_path):
     nifti_image = nib.load(ts_out_file_path)
     voxel_spacing = nifti_image.header.get_zooms()
@@ -46,6 +88,19 @@ def get_output_metadata(ts_out_file_path):
         },
         'meshes': [],
     }
+
+    value_average_indices = get_average_indices_of_all_values(volume_data)
+    for segment_value in value_average_indices:
+        segment_name = segment_value_to_name.get(int(segment_value), None)
+        if int(segment_value) == 0 or segment_name is None:
+            continue
+
+        output_metadata['meshes'].append({
+            'name': f"{segment_name}",
+            'geometricOrigin': json.dumps(value_average_indices[segment_value]),
+        })
+        
+    return output_metadata
 
     segment_values = np.unique(volume_data)
     for segment_value in segment_values:
@@ -73,22 +128,9 @@ def get_output_metadata(ts_out_file_path):
     return output_metadata
 
 def total_segmentator_output_to_gltf(ts_out_file_path, model_out_path):
-    print(run_convertor_script_cmd)
-
     copy2(ts_out_file_path, convertor_script_input_path)
-    # exit_code = os.system(run_convertor_script_cmd)
-    subprocess.run([
-        SLICER_EXE_PATH,
-        "--python-script",
-        convertor_script_path,
-        "--no-splash",
-        "--no-main-window"
-    ])
-    # print(exit_code)
-    print("------------------> Script completed")
+    subprocess.run(run_convertor_script_cmd_args)
     copy2(convertor_script_out_path, model_out_path)
-
-   
-
+    
     output_metadata = get_output_metadata(ts_out_file_path)
     return output_metadata
