@@ -39,11 +39,6 @@ with open(segments_json_path, 'r') as file:
     segment_value_to_name = {int(key): value for key, value in data.items()}
     segment_names = [value for key, value in data.items()]
 
-def get_average_index_of_value(volume_data, value):
-    val_indices = np.where(volume_data == value)
-    val_average_index = np.mean(val_indices, axis=1)
-    return val_average_index.tolist()
-
 def get_average_indices_of_all_values(volume_data):
     value_indices_sum = {}
     for i in range(volume_data.shape[0]):
@@ -100,31 +95,6 @@ def get_output_metadata(ts_out_file_path):
             'geometricOrigin': json.dumps(value_average_indices[segment_value]),
         })
         
-    return output_metadata
-
-    segment_values = np.unique(volume_data)
-    for segment_value in segment_values:
-        if int(segment_value) == 0: # background
-            continue
-
-        segment_name = segment_value_to_name.get(int(segment_value), None)
-        if segment_name is None:
-            # print(f"No name found for segment value {segment_value}. Skipping this segment...")
-            continue
-
-        segment_geometric_origin = get_average_index_of_value(volume_data, segment_value)
-
-        output_metadata['meshes'].append({
-            'name': f"{segment_name}",
-            'geometricOrigin': json.dumps(segment_geometric_origin),
-        })
-
-    # for key in output_metadata['input_volume']:
-    #     print(key, type(output_metadata['input_volume'][key]))
-
-    # for key in output_metadata['meshes'][0]:
-    #     print(key, type(output_metadata['meshes'][0][key]))
-    
     return output_metadata
 
 def total_segmentator_output_to_gltf(ts_out_file_path, model_out_path):
