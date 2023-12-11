@@ -57,14 +57,20 @@ def generate_report_text_and_model(
     report_object.processing_status = "Getting segments of interest..."
     report_object.save()
 
-    # try:
-    #     segments_of_interest = get_segments_of_interest(report_data)
-    # except:
-    #     task_status = f"Failed to get segments of interest."
-    #     report_object.processing_status = task_status
-    #     report_object.save()
-    #     print(task_status)
-    #     return task_status
+    try:
+        # segments_of_interest = get_segments_of_interest(report_data)
+        segments_of_interest = [
+            'rib_left_10',
+            'spleen',
+            'foo_bar_that_does_not_exist',
+            'adrenal_gland_left',
+        ]
+    except:
+        task_status = f"Failed to get segments of interest."
+        report_object.processing_status = task_status
+        report_object.save()
+        print(task_status)
+        return task_status
     
     report_object.processing_status = "Running Total Segmentator on nii image..."
     report_object.save()
@@ -84,7 +90,7 @@ def generate_report_text_and_model(
     # try:
     meshes_metadata = total_segmentator_output_to_gltf(ts_out_file_path, meshes_output_dir_path)
     # print(meshes_metadata)
-    # meshes_metadata['segmentsOfInterest'] = segments_of_interest
+    meshes_metadata['segmentsOfInterest'] = segments_of_interest
     # except:
     #     task_status = f"Failed to generate glTF from segmentation."
     #     report_object.processing_status = task_status
